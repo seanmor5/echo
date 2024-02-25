@@ -16,7 +16,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
 
     url =
       URI.new!("wss://api.elevenlabs.io")
-      |> URI.append_path("/v1/text-to-speech/#{env(:voice_id)}")
+      |> URI.append_path("/v1/text-to-speech/#{env(:voice_id)}/stream-input")
       |> URI.append_query(URI.encode_query(params))
       |> URI.to_string()
 

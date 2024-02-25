@@ -6,7 +6,7 @@ Echo is a WebSocket server for conversational agents with low latency and suppor
 
 ## Usage
 
-Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#customization) and running:
+Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. I will eventually provide a Docker image, but there isn't any right now. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#customization) and running:
 
 ```sh
 $ mix phx.server
@@ -100,3 +100,7 @@ ELEVEN_LABS_OUTPUT_FORMAT=pcm_44100
 ## Examples
 
 - [Phoenix LiveView Example](#)
+
+## Acknowledgements
+
+Thank you to [Andres Alejos](https://twitter.com/ac_alejos) for help setting up the VAD model and [Paulo Valente](https://twitter.com/polvalente) for some teachings on audio processing.

@@ -20,7 +20,7 @@ config :openai,
   api_key: System.get_env("OPENAI_API_KEY"),
   http_options: [recv_timeout: :infinity, async: :once]
 
-config :echo, Echo.Client.ElevenLabs,
+config :echo, Echo.Client.ElevenLabs.WebSocket,
   api_key: System.get_env("ELEVEN_LABS_API_KEY"),
   voice_id: System.get_env("ELEVEN_LABS_VOICE_ID") || "ThT5KcBeYPX3keUQqHPh",
   model_id: System.get_env("ELEVEN_LABS_MODEL_ID") || "eleven_turbo_v2",

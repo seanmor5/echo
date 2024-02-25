@@ -75,7 +75,8 @@ defmodule EchoWeb.Socket.Conversation do
     {:push, {:binary, message}, state}
   end
 
-  def handle_info(_message, state) do
+  def handle_info(message, state) do
+    IO.inspect message
     Logger.info("Ignored message")
     {:ok, state}
   end

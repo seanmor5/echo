@@ -97,7 +97,6 @@ defmodule EchoWeb.Socket.Conversation do
 
     {:ok, tts_pid} =
       WebSocket.start_link(fn audio ->
-        IO.inspect audio
         send(target, {:audio, audio})
       end)
 
@@ -209,14 +208,15 @@ defmodule EchoWeb.Socket.Conversation do
         messages: chat,
         max_tokens: 400,
         stream: true
-      )
+      ) |> IO.inspect
 
-    reply_pid = start_speaking(response, tts_pid)
+    reply_pid = start_speaking(response, tts_pid) |> IO.inspect
     %{state | reply_pid: reply_pid, mode: :replying}
   end
 
   defp start_speaking(response, tts_pid) do
     Task.async(fn ->
+      IO.inspect "here"
       Echo.TextToSpeech.stream(response, tts_pid)
     end)
   end

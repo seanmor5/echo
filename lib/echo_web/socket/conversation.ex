@@ -209,7 +209,7 @@ defmodule EchoWeb.Socket.Conversation do
         model: "gpt-3.5-turbo",
         messages: chat,
         max_tokens: 400,
-        steam: true
+        stream: true
       )
 
     reply_pid = start_speaking(response, tts_pid)

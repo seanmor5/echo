@@ -3,17 +3,17 @@ defmodule Echo.SpeechToText do
   Generic TTS Module.
   """
 
-  @repo "distil-whisper/distil-medium.en"
+  @hf_repo {:hf, "distil-whisper/distil-medium.en"}
 
   def serving() do
     {:ok, model_info} =
-      Bumblebee.load_model({:hf, @repo},
+      Bumblebee.load_model(@hf_repo,
         type: Axon.MixedPrecision.create_policy(params: {:f, 16}, compute: {:f, 16})
       )
 
-    {:ok, featurizer} = Bumblebee.load_featurizer({:hf, @repo})
-    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, @repo})
-    {:ok, generation_config} = Bumblebee.load_generation_config({:hf, @repo})
+    {:ok, featurizer} = Bumblebee.load_featurizer(@hf_repo)
+    {:ok, tokenizer} = Bumblebee.load_tokenizer(@hf_repo)
+    {:ok, generation_config} = Bumblebee.load_generation_config(@hf_repo)
 
     Bumblebee.Audio.speech_to_text_whisper(model_info, featurizer, tokenizer, generation_config,
       task: nil,

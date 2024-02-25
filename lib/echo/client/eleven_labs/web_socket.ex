@@ -71,5 +71,5 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
     {:ok, state}
   end
 
-  defp env(key), do: Application.fetch_env!(:echo, __MODULE__)[key]
+  defp env(key), do: :echo |> Application.fetch_env!(__MODULE__) |> Keyword.fetch!(key)
 end

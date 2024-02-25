@@ -13,8 +13,8 @@ defmodule EchoWeb.Endpoint do
 
   socket "/conversation", EchoWeb.Socket.Conversation,
     websocket: [
-      path: "/conversation",
-      serializer: EchoWeb.Socket.Serializer
+      serializer: EchoWeb.Socket.Serializer,
+      connect_info: [:peer_data]
     ],
     longpoll: false
 

@@ -202,15 +202,17 @@ defmodule EchoWeb.Socket.Conversation do
   end
 
   defp reply(%{chat: chat, tts_pid: tts_pid} = state) do
+    IO.inspect state.tts_pid
+
     response =
       Echo.TextGeneration.chat_completion(
         model: "gpt-3.5-turbo",
         messages: chat,
         max_tokens: 400,
         stream: true
-      ) |> IO.inspect
+      )
 
-    reply_pid = start_speaking(response, tts_pid) |> IO.inspect
+    reply_pid = start_speaking(response, tts_pid)
     %{state | reply_pid: reply_pid, mode: :replying}
   end
 

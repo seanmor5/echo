@@ -22,7 +22,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
 
     WebSockex.start_link(url, __MODULE__, %{fun: broadcast_fun, token: ""},
       extra_headers: headers
-    )
+    ) |> IO.inspect
   end
 
   def open_stream(pid) do
@@ -39,7 +39,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
 
   def send(pid, text) do
     msg = Jason.encode!(%{text: "#{text} ", try_trigger_generation: true})
-    WebSockex.send_frame(pid, {:text, msg})
+    WebSockex.send_frame(pid, {:text, msg}) |> IO.inspect
   end
 
   def flush(pid) do
@@ -60,7 +60,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
   def handle_frame({:text, msg}, %{fun: broadcast_fun, token: token} = state) do
     case Jason.decode!(msg) do
       %{"audio" => audio} when is_binary(audio) ->
-        raw = Base.decode64!(audio)
+        raw = Base.decode64!(audio) |> IO.inspect
         broadcast_fun.(token <> raw)
 
       error ->

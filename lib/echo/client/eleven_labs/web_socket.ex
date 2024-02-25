@@ -20,6 +20,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
       |> URI.append_path("/v1/text-to-speech/")
       |> URI.append_query(URI.encode_query(params))
       |> URI.to_string()
+      |> IO.inspect
 
     WebSockex.start_link(url, __MODULE__, %{fun: broadcast_fun, token: ""},
       extra_headers: headers

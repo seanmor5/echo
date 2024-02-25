@@ -76,7 +76,6 @@ defmodule EchoWeb.Socket.Conversation do
   end
 
   def handle_info(message, state) do
-    IO.inspect message
     Logger.info("Ignored message")
     {:ok, state}
   end
@@ -102,7 +101,6 @@ defmodule EchoWeb.Socket.Conversation do
         send(target, {:audio, audio})
       end)
 
-    Process.link(tts_pid)
     tts_pid = WebSocket.open_stream(tts_pid)
     WebSocket.update_token(tts_pid, token)
 

@@ -75,7 +75,7 @@ defmodule EchoWeb.Socket.Conversation do
     {:push, {:binary, message}, state}
   end
 
-  def handle_info(message, state) do
+  def handle_info(_, state) do
     Logger.info("Ignored message")
     {:ok, state}
   end
@@ -90,7 +90,6 @@ defmodule EchoWeb.Socket.Conversation do
   defp handle_message(%{"type" => "open", "prompt" => prompt}, %{mode: :closed} = state) do
     # Parameters
     chat = [%{role: "system", content: prompt}]
-
     target = self()
 
     # Start TTS pid and sync tokens
@@ -98,6 +97,7 @@ defmodule EchoWeb.Socket.Conversation do
 
     {:ok, tts_pid} =
       WebSocket.start_link(fn audio ->
+        IO.inspect audio
         send(target, {:audio, audio})
       end)
 

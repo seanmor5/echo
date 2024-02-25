@@ -15,7 +15,8 @@ defmodule EchoWeb.Endpoint do
     websocket: [
       path: "/conversation",
       serializer: EchoWeb.Socket.Serializer
-    ]
+    ],
+    longpoll: false
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]

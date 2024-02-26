@@ -6,13 +6,62 @@ Echo is a WebSocket server for conversational agents with low latency and suppor
 
 ## Usage
 
+### Development Server
+
 Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. I will eventually provide a Docker image, but there isn't any right now. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#customization) and running:
 
 ```sh
-$ mix phx.server
+mix phx.server
 ```
 
 This will start a server running on port 4000 with a single endpoint: `ws://localhost:4000/conversation`. I highly recommend you run on a GPU-enabled machine and set `XLA_ENV=cuda120`. I can get very low latency, but only by running transcription on a GPU.
+
+### Docker Deployment
+
+Alternatively, you can build a Docker image from the included `Dockerfile`
+
+#### Build
+
+Using the format:
+
+```sh
+docker build -t TAG_NAME DOCKERFILE_PATH
+```
+
+Assuming you clone this repo and `cd` into the root of the repo (where the Dockerfile is):
+
+```sh
+docker build -t echo .
+```
+
+This will build a Docker image with the tag `echo`, but you can rename the tag or choose to not include any.
+
+You can also pass any of the following as a `--build-arg`:
+
+* `ELIXIR_VERSION` (defaults `1.15.0`)
+* `OTP_VERSION` (defaults `26.0.2`)
+* `DEBIAN_VERSION` (defaults `bullseye-20230612-slim`)
+* `BUILDER_IMAGE` (defaults `hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}`)
+* `RUNNER_IMAGE` (defaults `debian:${DEBIAN_VERSION}`)
+
+You should not need to adjust the default values, but if you need to consult the Dockerfile itself for
+information on their usage.
+
+#### Run
+
+Then to run the server do:
+
+```sh
+docker run -e SECRET_KEY_BASE=$(mix phx.gen.secret) -e OPENAI_API_KEY=YOUR_API_KEY -e ELEVEN_LABS_API_KEY=YOUR_OTHER_API_KEY -p 4001:4000 echo
+```
+
+The Dockerfile builds the server as a production release, so you'll need to include the `SECRET_KEY_BASE` string.
+`mix phx.gen.secret` will generate a new secret for you, but you can use any secrey you desire.
+
+`-p 4001:4000` binds your host's port 4001 to the containers port 4000. If you want to bind to a different port on
+your host machine just change the first number, like `-p PORT:4000`.
+
+You can also pass any other environment variables accepted by the server, as described in detail below.
 
 ### Interacting with the WebSocket Server
 
@@ -20,15 +69,15 @@ This will start a server running on port 4000 with a single endpoint: `ws://loca
 
 The WebSocket server uses [MessagePack](https://msgpack.org/index.html) for serialization. Each message object contains a `type` field representing the type of message to send, and then some additional data. These are the types of messages you can send to the client:
 
-- `{type: "open", prompt: "System prompt for agent"}`
-- `{type: "audio", audio: ArrayBuffer}`
-- `{type: "state", state: "waiting"}`
+* `{type: "open", prompt: "System prompt for agent"}`
+* `{type: "audio", audio: ArrayBuffer}`
+* `{type: "state", state: "waiting"}`
 
 After connecting, you should send an "open" message to the server with the system prompt for the agent you'd like to interact with. The server will immediately start pushing audio. The types of messages the server sends to the client are:
 
-- `{type: "audio", audio: ArrayBuffer}`
-- `{type: "token", token: String}`
-- `{type: "interrupt", token: String}`
+* `{type: "audio", audio: ArrayBuffer}`
+* `{type: "token", token: String}`
+* `{type: "interrupt", token: String}`
 
 Each audio event sends data as a MessagePack binary which will get decoded as a UInt8Array. The first 8 bytes are a sequencing token for interrupts. You should use the sequencing token to avoid race conditions in the event your agent is interrupted in the middle of streaming audio from ElevenLabs. The rest of the audio is a buffer matching the format provided in your configuration. For example, I recommend using `pcm_44100` which will output 16-bit PCM audio data. Then you can convert the incoming audio data like:
 
@@ -83,8 +132,8 @@ You should send data to the server in the same endianness as the server. You sho
 
 Configuration is limited right now. The only supported LLM provider is OpenAI. The only supported TTS provider is ElevenLabs. You must set API keys for both:
 
-- `OPENAI_API_KEY`
-- `ELEVEN_LABS_API_KEY`
+* `OPENAI_API_KEY`
+* `ELEVEN_LABS_API_KEY`
 
 The STT model is `distil-whisper/distil-medium.v2` running with Nx and Bumblebee. I plan to add an support for customizable LLMs via external OpenAI-compatible endpoints, as well as LLMs running directly in server with Nx and Bumblebee.
 
@@ -99,7 +148,7 @@ ELEVEN_LABS_OUTPUT_FORMAT=pcm_44100
 
 ## Examples
 
-- [Phoenix LiveView Example](https://github.com/seanmor5/echo_example)
+* [Phoenix LiveView Example](https://github.com/seanmor5/echo_example)
 
 ## Acknowledgements
 

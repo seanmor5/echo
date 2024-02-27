@@ -2,13 +2,13 @@
 
 > Give your agents a voice with Echo.
 
-Echo is a WebSocket server for conversational agents with low latency and support for interrupts. You can read the [origin blog post here](#).
+Echo is a WebSocket server for conversational agents with low latency and support for interrupts. You can read the [origin blog post here](https://seanmoriarity.com/2024/02/25/implementing-natural-conversational-agents-with-elixir/).
 
 ## Usage
 
 ### Development Server
 
-Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. I will eventually provide a Docker image, but there isn't any right now. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#customization) and running:
+Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. I will eventually provide a Docker image, but there isn't any right now. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#configuration) and running:
 
 ```sh
 mix phx.server
@@ -128,7 +128,7 @@ You should send data to the server in the same endianness as the server. You sho
     });
 ```
 
-### Configuration
+### Configuration {#configuration}
 
 Configuration is limited right now. The only supported LLM provider is OpenAI. The only supported TTS provider is ElevenLabs. You must set API keys for both:
 

@@ -25,7 +25,6 @@ config :echo, Echo.Client.ElevenLabs.WebSocket,
   voice_id: System.get_env("ELEVEN_LABS_VOICE_ID") || "21m00Tcm4TlvDq8ikWAM",
   model_id: System.get_env("ELEVEN_LABS_MODEL_ID") || "eleven_turbo_v2",
   optimize_streaming_latency: System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY") || 2,
-  # default to mp3 since PCM is paywalled
   output_format: System.get_env("ELEVEN_LABS_OUTPUT_FORMAT") || "mp3_22050_32"
 
 config :nx, default_backend: EXLA.Backend

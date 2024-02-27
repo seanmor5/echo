@@ -1,13 +1,11 @@
 ARG ELIXIR_VERSION=1.15.0
 ARG OTP_VERSION=26.0.2
-ARG DEBIAN_VERSION=bullseye-20230612-slim
-
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG UBUNTU_VERSION=jammy-20230126
+ARG CUDA_VERSION=12.2.2
 
 FROM rust as rust
 
-FROM ${BUILDER_IMAGE} as builder
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-ubuntu-${UBUNTU_VERSION} as builder
 COPY --from=rust /usr/local/cargo /usr/local/cargo
 ENV PATH=$PATH:/usr/local/cargo/bin
 # install build dependencies
@@ -51,15 +49,17 @@ RUN mix release
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
-FROM ${RUNNER_IMAGE}
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-runtime-ubuntu22.04
 
-ENV ELEVEN_LABS_MODEL_ID="eleven_turbo_v2"
-ENV ELEVEN_LABS_VOICE_ID="21m00Tcm4TlvDq8ikWAM"
-ENV ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY=2
-ENV ELEVEN_LABS_OUTPUT_FORMAT="mp3_22050_32"
-
-RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+RUN apt-get update -y && \
+    apt-get install -y \
+    libstdc++6 \
+    openssl \
+    libncurses5 \
+    locales \
+    ca-certificates && \
+    apt-get clean && \
+    rm -f /var/lib/apt/lists/*_*
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
@@ -76,6 +76,7 @@ RUN chown nobody /app
 # set runner ENV
 ENV MIX_ENV="prod"
 ENV BUMBLEBEE_CACHE_DIR="/app/.bumblebee"
+ENV XLA_TARGET="cuda120"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/echo ./

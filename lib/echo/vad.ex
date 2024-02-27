@@ -5,7 +5,6 @@ defmodule Echo.VAD do
   Ideally, we would use Nx.Serving here, but unfortunately it does
   not currently support custom batch dimensions.
   """
-  @model_path Path.join([:code.priv_dir(:echo), "models", "silero_vad.onnx"])
   @sample_rate 16_000
 
   @threshold 0.5
@@ -26,7 +25,7 @@ defmodule Echo.VAD do
 
   @impl true
   def init(_opts) do
-    model = Ortex.load(@model_path)
+    model = Ortex.load(Path.join([:code.priv_dir(:echo), "models", "silero_vad.onnx"]))
 
     {:ok,
      %{

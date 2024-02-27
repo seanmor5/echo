@@ -25,7 +25,7 @@ config :echo, Echo.Client.ElevenLabs.WebSocket,
   voice_id: System.get_env("ELEVEN_LABS_VOICE_ID") || "21m00Tcm4TlvDq8ikWAM",
   model_id: System.get_env("ELEVEN_LABS_MODEL_ID") || "eleven_turbo_v2",
   optimize_streaming_latency: System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY") || 2,
-  output_format: System.get_env("ELEVEN_LABS_OUTPUT_FORMAT") || "pcm_44100"
+  output_format: System.get_env("ELEVEN_LABS_OUTPUT_FORMAT") || "mp3_22050_32"
 
 config :nx, default_backend: EXLA.Backend
 
@@ -49,7 +49,7 @@ if config_env() == :prod do
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :echo, EchoWeb.Endpoint,
-    http: [ip: {127, 0, 0, 1}, port: port],
+    http: [ip: {0, 0, 0, 0}, port: port],
     server: true,
     code_reloader: false,
     check_origin: false,

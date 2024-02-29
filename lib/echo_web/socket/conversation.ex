@@ -95,9 +95,13 @@ defmodule EchoWeb.Socket.Conversation do
     token = tts_token()
 
     {:ok, tts_pid} =
-      WebSocket.start_link(fn audio ->
-        send(target, {:audio, audio})
-      end, token)
+      WebSocket.start_link(
+        fn audio ->
+          send(target, {:audio, audio})
+        end,
+        token
+      )
+
     tts_pid = WebSocket.open_stream(tts_pid)
 
     # Update state, and start conversation

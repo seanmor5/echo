@@ -22,7 +22,7 @@ defmodule Echo.Client.ElevenLabs.WebSocket do
 
     WebSockex.start_link(url, __MODULE__, %{fun: broadcast_fun, token: token},
       extra_headers: headers
-    ) 
+    )
   end
 
   def open_stream(pid) do

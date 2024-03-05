@@ -16,16 +16,64 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-config :openai,
-  api_key: System.get_env("OPENAI_API_KEY"),
-  http_options: [recv_timeout: :infinity, async: :once]
+
+case System.get_env("TEXT_GENERATION_PROVIDER") do
+  "openai" ->
+    config :openai,
+      api_key:
+        System.get_env("OPENAI_API_KEY") ||
+          raise("OPENAI_API_KEY required when provider is OpenAI",
+            http_options: [recv_timeout: :infinity, async: :once]
+          )
+
+    config :echo, Echo.TextGeneration, provider: Echo.TextGeneration.OpenAI
+
+    config :echo, Echo.TextGeneration.OpenAI,
+      model:
+        System.get_env("TEXT_GENERATION_MODEL") ||
+          raise("TEXT_GENERATION_MODEL is required",
+            max_tokens: System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS") || 400
+          )
+
+  "generic" ->
+    config :echo, Echo.TextGeneration, provider: Echo.TextGeneration.OpenAI
+
+    config :openai,
+      api_url:
+        System.get_env("TEXT_GENERATION_API_URL") ||
+          raise("TEXT_GENERATION_API_URL is required when provider is generic",
+            http_options: [recv_timeout: :infinity, async: :once]
+          )
+
+    config :echo, Echo.TextGeneration.OpenAI,
+      model: System.get_env("TEXT_GENERATION_MODEL") || "gpt-3.5-turbo",
+      max_tokens: System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS") || 400
+
+  "bumblebee" ->
+    config :echo, Echo.TextGeneration, provider: Echo.TextGeneration.Bumblebee
+
+    config :echo, Echo.TextGeneration.Bumblebee,
+      repo:
+        System.get_env("TEXT_GENERATION_MODEL") ||
+          "TEXT_GENERATION_MODEL is required when provider is bumblebee",
+      max_new_tokens: System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS") || 400,
+      max_sequence_length: System.get_env("TEXT_GENERATION_MAX_SEQUENCE_LENGTH") || 2048
+end
+
+config :echo, Echo.SpeechToText.Bumblebee,
+  repo:
+    System.get_env("SPEECH_TO_TEXT_MODEL_REPO") ||
+      "SPEECH_TO_TEXT_MODEL_REPO is required when provider is bumblebee"
 
 config :echo, Echo.Client.ElevenLabs.WebSocket,
-  api_key: System.get_env("ELEVEN_LABS_API_KEY"),
-  voice_id: System.get_env("ELEVEN_LABS_VOICE_ID") || "21m00Tcm4TlvDq8ikWAM",
-  model_id: System.get_env("ELEVEN_LABS_MODEL_ID") || "eleven_turbo_v2",
-  optimize_streaming_latency: System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY") || 2,
-  output_format: System.get_env("ELEVEN_LABS_OUTPUT_FORMAT") || "mp3_22050_32"
+  api_key:
+    System.get_env("ELEVEN_LABS_API_KEY") ||
+      raise("ELEVEN_LABS_API_KEY is required when provider is eleven_labs",
+        voice_id: System.get_env("ELEVEN_LABS_VOICE_ID") || "21m00Tcm4TlvDq8ikWAM",
+        model_id: System.get_env("ELEVEN_LABS_MODEL_ID") || "eleven_turbo_v2",
+        optimize_streaming_latency: System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY") || 2,
+        output_format: System.get_env("ELEVEN_LABS_OUTPUT_FORMAT") || "mp3_22050_32"
+      )
 
 config :nx, default_backend: EXLA.Backend
 

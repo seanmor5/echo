@@ -3,21 +3,34 @@ defmodule Echo.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      EchoWeb.Telemetry,
-      {Nx.Serving,
-       name: Echo.SpeechToText,
-       serving: Echo.SpeechToText.serving(),
-       batch_size: 1,
-       batch_timeout: 10},
-      Echo.VAD,
-      EchoWeb.Endpoint
-    ]
+    children = [EchoWeb.Telemetry] ++ servings() ++ [Echo.VAD, EchoWeb.Endpoint]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Echo.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp servings() do
+    stt_serving =
+      {Nx.Serving,
+       name: Echo.SpeechToText,
+       serving: Echo.SpeechToText.Bumblebee.serving(),
+       batch_size: 1,
+       batch_timeout: 10}
+
+    if Application.fetch_env!(:echo, Echo.TextGeneration)[:provider] == "bumblebee" do
+      [
+        stt_serving,
+        {Nx.Serving,
+         name: Echo.TextGeneration,
+         serving: Echo.TextGeneration.Bumblebee.serving(),
+         batch_size: 1,
+         batch_timeout: 10}
+      ]
+    else
+      [stt_serving]
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

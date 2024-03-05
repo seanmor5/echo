@@ -8,7 +8,7 @@ Echo is a WebSocket server for conversational agents with low latency and suppor
 
 ### Development Server
 
-Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. I will eventually provide a Docker image, but there isn't any right now. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#configuration) and running:
+Echo is an [Elixir Phoenix](https://www.phoenixframework.org/) application. You can run the server by installing Elixir and Phoenix, setting the [required environment variables](#configuration) and running:
 
 ```sh
 mix phx.server
@@ -52,7 +52,13 @@ information on their usage.
 Then to run the server do:
 
 ```sh
-docker run -e SECRET_KEY_BASE=$(mix phx.gen.secret) -e OPENAI_API_KEY=YOUR_API_KEY -e ELEVEN_LABS_API_KEY=YOUR_OTHER_API_KEY -p 4001:4000 echo
+docker run \
+  -e SECRET_KEY_BASE=$(mix phx.gen.secret) \
+  -e OPENAI_API_KEY=YOUR_API_KEY \
+  -e TEXT_GENERATION_MODEL=gpt-3.5-turbo \
+  -e SPEECH_TO_TEXT_MODEL=distil-whisper/distil-medium.en \
+  -e ELEVEN_LABS_API_KEY=YOUR_OTHER_API_KEY \
+  -p 4001:4000 echo
 ```
 
 The Dockerfile builds the server as a production release, so you'll need to include the `SECRET_KEY_BASE` string.
@@ -128,23 +134,55 @@ You should send data to the server in the same endianness as the server. You sho
     });
 ```
 
-### Configuration {#configuration}
+## Configuration {#configuration}
 
-Configuration is limited right now. The only supported LLM provider is OpenAI. The only supported TTS provider is ElevenLabs. You must set API keys for both:
+Echo aims to be as configurable as possible. Right now you can configure each piece to varying extents.
 
-* `OPENAI_API_KEY`
-* `ELEVEN_LABS_API_KEY`
+### LLM Configuration
 
-The STT model is `distil-whisper/distil-medium.v2` running with Nx and Bumblebee. I plan to add an support for customizable LLMs via external OpenAI-compatible endpoints, as well as LLMs running directly in server with Nx and Bumblebee.
+Echo supports configurable LLMs through environment variables. First, you must set a provider with `TEXT_GENERATION_PROVIDER`. There are 3 possible providers:
 
-There are a few TTS-specific customization options. If possible, I recommend keeping the defaults:
+* `bumblebee` - Use a [Bumblebee](https://github.com/elixir-nx/bumblebee) supported model. This will run the model under an [Nx Serving](https://hexdocs.pm/nx/Nx.Serving.html) and has the benefit of no HTTP Request overhead. Models will be compiled with [XLA](https://github.com/openxla/xla).
+* `openai` - Use an OpenAI model such as GPT-3.5 or GPT-4.
+* `generic` - Use a generic model provider with an OpenAI compatible `/v1/chat/completions` endpoint.
 
-```
-ELEVEN_LABS_VOICE_ID=ThT5KcBeYPX3keUQqHPh
-ELEVEN_LABS_MODEL_ID=eleven_turbo_v2
-ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY=2
-ELEVEN_LABS_OUTPUT_FORMAT=pcm_44100
-```
+Each provider has it's own specific configuration options. Some options are shared between providers.
+
+#### Bumblebee Configuration
+
+* `TEXT_GENERATION_MODEL` (required) - The HuggingFace model repo of the LLM you would like to use. The model configuration in the given repository must support text generation.
+* `TEXT_GENERATION_MAX_SEQUENCE_LENGTH` (optional, default: 2048) - Maximum total number of tokens for a given conversation.
+* `TEXT_GENERATION_MAX_NEW_TOKENS` (optional, default: 400) - Maximum new tokens to generate on each conversation turn.
+
+#### OpenAI Configuration
+
+* `OPENAI_API_KEY` (required) - Your OpenAI API key.
+* `TEXT_GENERATION_MODEL` (required) - The OpenAI model to use.
+* `TEXT_GENERATION_MAX_NEW_TOKENS` (optional, default: 400) - Maximum new tokens to generate on each conversation turn.
+
+#### Generic Configuration
+
+* `TEXT_GENERATION_API_URL` (required) - The OpenAI-compatible chat completions endpoint to use.
+* `TEXT_GENERATION_MODEL` (required) - The generic model to use.
+* `TEXT_GENERATION_API_KEY` (optional) - API key, if necessary, for the OpenAI-compatible endpoint.
+* `TEXT_GENERATION_MAX_NEW_TOKENS` (optional, default: 400) - Maximum new tokens to generate on each conversation turn.
+
+### Speech-to-Text Configuration
+
+Currently, the only supported speech-to-text provider is Bumblebee. You can customize the speech-to-text model with:
+
+* `SPEECH_TO_TEXT_MODEL` (required) - The HuggingFace model repo of the STT model you would like to use. `distil-whisper/distil-medium.en` is a good default for most configurations.
+
+### Text-to-Speech Configuration
+
+Currently, the only supported text-to-speech provider is ElevenLabs. There are a number of configuration options to customize the experience with ElevenLabs.
+
+#### ElevenLabs Configuration
+
+* `ELEVEN_LABS_API_KEY` (required) - Your ElevenLabs API key.
+* `ELEVEN_LABS_MODEL_ID` (optional, default: "eleven_turbo_v2") - The ElevenLabs model ID to use. In most cases you should just leave the default.
+* `ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY` (optional, default: 2) - The ElevenLabs optimization setting. Higher numbers result in better latency but will struggle with some pronounciations.
+* `ELEVEN_LABS_OUTPUT_FORMAT` (optional, default: mp3_22050_32) - The ElevenLabs audio output format. Adjusting this can impact latency due to decoding requirements.
 
 ## Examples
 

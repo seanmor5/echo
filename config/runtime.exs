@@ -75,8 +75,8 @@ end
 # Speech-to-Text
 stt_model_repo = System.fetch_env!("SPEECH_TO_TEXT_MODEL")
 
+config :echo, Echo.SpeechToText, provider: Echo.SpeechToText.Bumblebee
 config :echo, Echo.SpeechToText.Bumblebee, repo: stt_model_repo
-
 # Text-to-Speech
 eleven_labs_api_key = System.fetch_env!("ELEVEN_LABS_API_KEY")
 eleven_labs_voice_id = System.get_env("ELEVEN_LABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")

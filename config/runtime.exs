@@ -24,7 +24,9 @@ case provider do
   "openai" ->
     openai_api_key = System.fetch_env!("OPENAI_API_KEY")
     openai_model = System.fetch_env!("TEXT_GENERATION_MODEL")
-    openai_max_tokens = System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", 400)
+
+    openai_max_tokens =
+      System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", "400") |> String.to_integer()
 
     config :openai,
       api_key: openai_api_key,
@@ -39,7 +41,9 @@ case provider do
   "generic" ->
     generic_api_url = System.fetch_env!("TEXT_GENERATION_API_URL")
     generic_model = System.fetch_env!("TEXT_GENERATION_MODEL")
-    generic_max_tokens = System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", 400)
+
+    generic_max_tokens =
+      System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", "400") |> String.to_integer()
 
     config :echo, Echo.TextGeneration, provider: Echo.TextGeneration.OpenAI
 
@@ -53,8 +57,12 @@ case provider do
 
   "bumblebee" ->
     bb_text_generation_model = System.fetch_env!("TEXT_GENERATION_MODEL")
-    bb_max_new_tokens = System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", 400)
-    bb_max_sequence_length = System.get_env("TEXT_GENERATION_MAX_SEQUENCE_LENGTH", 2048)
+
+    bb_max_new_tokens =
+      System.get_env("TEXT_GENERATION_MAX_NEW_TOKENS", "400") |> String.to_integer()
+
+    bb_max_sequence_length =
+      System.get_env("TEXT_GENERATION_MAX_SEQUENCE_LENGTH", "2048") |> String.to_integer()
 
     config :echo, Echo.TextGeneration, provider: Echo.TextGeneration.Bumblebee
 
@@ -65,7 +73,7 @@ case provider do
 end
 
 # Speech-to-Text
-stt_model_repo = System.fetch_env!("SPEECH_TO_TEXT_MODEL_REPO")
+stt_model_repo = System.fetch_env!("SPEECH_TO_TEXT_MODEL")
 
 config :echo, Echo.SpeechToText.Bumblebee, repo: stt_model_repo
 
@@ -75,7 +83,7 @@ eleven_labs_voice_id = System.get_env("ELEVEN_LABS_VOICE_ID", "21m00Tcm4TlvDq8ik
 eleven_labs_model_id = System.get_env("ELEVEN_LABS_MODEL_ID", "eleven_turbo_v2")
 
 eleven_labs_optimize_streaming_latency =
-  System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY", 2)
+  System.get_env("ELEVEN_LABS_OPTIMIZE_STREAMING_LATENCY", "2") |> String.to_integer()
 
 eleven_labs_output_format = System.get_env("ELEVEN_LABS_OUTPUT_FORMAT", "mp3_22050_32")
 
